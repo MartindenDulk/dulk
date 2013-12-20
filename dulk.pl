@@ -46,10 +46,10 @@ print $sock "JOIN $channel\r\n";
 while (my $input = <$sock>) {
     print $input;
     while( $input =~ m/(?<raw_message>\:(?<source>((?<nick>[^!]+)![~]{0,1}(?<user>[^@]+)@)?(?<host>[^\s]+)) (?<command>[^\s]+)( )?(?<parameters>[^:]+){0,1}(:)?(?<text>[^\r^\n]+)?)/gi) {
-        my ($raw, $source, $nick, $user, $host, $command, $parameters, $text) = ($1, $2, $3, $4, $5, $6, $7, $8);
-
-        if ($nick) {
-            print $sock "PRIVMSG #mojitotest :$nick just commanded $parameters with the parameters $parameters\r\n";
+        my ($raw, $fullhost, $ident, $nickname, $username, $hostname, $command, $acht, $channel, $tien, $query) = ($1 ... $11);
+        #1/raw 2/hostname 3/ident 4/nickname 5/nickname 6/hostname 7/command 8/leeg 9/channel 10/leeg 11/query
+        if (defined $nick && $command eq 'PRIVMSG') {
+            print $sock "PRIVMSG #mojitotest :Hey $nickname!\r\n";
         }
     }
 
