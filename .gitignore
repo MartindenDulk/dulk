@@ -38,4 +38,4 @@ Thumbs.db
 
 # FTP / SSH config   #
 ######################
-.settings
+*.settings
