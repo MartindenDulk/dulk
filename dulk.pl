@@ -45,13 +45,11 @@ print $sock "JOIN $channel\r\n";
 # Keep reading lines from the server.
 while (my $input = <$sock>) {
     print $input;
-    while( $input =~ m/(?<raw_message>\:(?<source>((?<nick>[^!]+)![~]{0,1}(?<user>[^@]+)@)?(?<host>[^\s]+)) (?<command>[^\s]+)( )?(?<parameters>[^:]+){0,1}(:)?(?<text>[^\r^\n]+)?)/gi) {
-        my ($raw, $source, $nick, $user, $host, $command, $parameters, $text) = ($1, $2, $3, $4, $5, $6, $7, $8);
+    my @data = split(' ',$input);
+    ($data[0]) = ($data[0] =~ m/(?<=:)(.*?)(?=!)/gi);
 
-        if ($nick) {
-            print $sock "PRIVMSG #mojitotest :$nick just commanded $parameters with the parameters $parameters\r\n";
-        }
+    if ($data[1] eq 'PRIVMSG' && $data[0] ne 'StatServ') { #Might want to add something that checks for services. Can't reply to that.
+        print $sock "$data[1] $data[2] So, if I got this right. You are $data[0] and you just sent me $data[3]\r\n";
     }
-
 }
 
