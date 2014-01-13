@@ -58,9 +58,9 @@ sub createSocket {
             if ($status eq "initialized") {
                 my @data = split(' ',$input);
                 ($data[0]) = ($data[0] =~ m/(?<=:)(.*?)(?=!)/gi);
-
+                my $query = join(' ',@data[ 3 .. $#data ]);
                 if ($data[1] eq 'PRIVMSG' && $data[0] =~ m/^(?!dulkbot|StatServ)/gi) { #Might want to add something that checks for services. Can't reply to that.
-                    print $sock "$data[1] $data[2] So, if I got this right. You are $data[0] and you just sent me $data[3]\r\n";
+                    print $sock "$data[1] $data[2] So, if I got this right. You are $data[0] and you just sent me $query\r\n";
                 }
             }
 

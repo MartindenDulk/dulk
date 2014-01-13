@@ -16,7 +16,7 @@ sub connect {
     setStatus($socket);
 }
 
-# Error handling. Just a print to console later. We could make this configurable. Perhaps relayed to the debug channel?
+# Error handling. Just a print to console. We could make this configurable. Perhaps relayed to the debug channel?
 sub throwError {
     (my $errorMessage, $errorScript) = @_;
     print "[ERROR - $errorScript] $errorMessage\n";
