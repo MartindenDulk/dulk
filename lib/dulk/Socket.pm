@@ -22,9 +22,12 @@ my $status = "";
 # The channel which the bot will join.
 my $channel = "#mojitotest";
 
+# Global socket variable
+my $sock;
+
 # Connect to the IRC server.
 sub createSocket {
-    my $sock = new IO::Socket::INET(PeerAddr => $server,
+    $sock = new IO::Socket::INET(PeerAddr => $server,
                                     PeerPort => 6667,
                                     Proto => 'tcp') or $bot->throwError("Can't connect to IRC server",__PACKAGE__);
     # Log on to the server. Add a check if connected
@@ -53,22 +56,31 @@ sub createSocket {
                 # I had to create another status (initialized) because it kept trying to join channels when he was already on them.
                 print $sock "JOIN $channel\r\n";
                 $status = "initialized";
+
+                $bot->loadPlugins();
+
             }
 
             if ($status eq "initialized") {
                 my @data = split(' ',$input);
                 ($data[0]) = ($data[0] =~ m/(?<=:)(.*?)(?=!)/gi);
                 my $query = join(' ',@data[ 3 .. $#data ]);
-                if ($data[1] eq 'PRIVMSG' && $data[0] =~ m/^(?!dulkbot|StatServ)/gi) { #Might want to add something that checks for services. Can't reply to that.
-                    print $sock "$data[1] $data[2] So, if I got this right. You are $data[0] and you just sent me $query\r\n";
-                }
+                if ($data[1] eq 'PRIVMSG' && $data[0] =~ m/^(?!dulkbot|StatServ)/gi) {
+                    # This qualifies as a message for now. Add a check for services / ignorelist etcetera later.
+                    $bot->messageReceived($input, $data[0], $query, $data[2], $data[1]);
+                  }
             }
 
         }
     }
 
+
     if ($@) { die "Mad error, yo: ". $@; }
     return $status;
 }
+
+sub relayMessage {
+        print $sock "PRIVMSG #mojitotest :Zou dit dan werken?!?\r\n";
+    }
 
 1;
