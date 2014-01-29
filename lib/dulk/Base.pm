@@ -4,6 +4,10 @@ package dulk::Base;
     my $bot;
     my %plugins; 
 
+
+    ### XML::Simple for config purposes
+    use XML::Simple;
+
     #constructor
     sub new {
         my $self = {};
@@ -44,7 +48,9 @@ package dulk::Base;
         my @message = @_;
 
         for my $plugin (keys %plugins) {
-            $plugin->public(@message);
+            eval {
+                $plugin->public(@message);
+            };
         }
 
         ## also parse it to dulk::Base
@@ -92,6 +98,11 @@ package dulk::Base;
         loadPlugins();
     }
 
+    sub config {
+        return XMLin("config.xml");
+    }
+
+
     sub public {
         my @input = @_[ 1 .. $#_ ];
         my ($raw, $nickname, $message, $destination, $type) = @input;
@@ -107,7 +118,7 @@ package dulk::Base;
 
     }
 
-    if ($!) { throwError("ERROR","$!",__PACKAGE__); }
+    if ($@) { throwError("ERROR","$@",__PACKAGE__); }
 1;
 
 
