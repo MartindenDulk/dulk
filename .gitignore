@@ -36,6 +36,7 @@
 ehthumbs.db
 Thumbs.db
 
-# FTP / SSH config   #
+# FTP / SSH / OWN config   #
 ######################
 *.settings
+config.xml
