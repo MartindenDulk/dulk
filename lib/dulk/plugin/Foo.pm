@@ -12,8 +12,6 @@ my $bot = new dulk::Base;
 
 sub public {
 
-print "\n\n FOO PUBLIC CALLED \n\n";
-
 	my @query = @_[ 2 .. $#_ ];
     my ($raw, $nickname, $message, $destination, $type) = @query;
 	
@@ -28,8 +26,5 @@ print "\n\n FOO PUBLIC CALLED \n\n";
 
 
 }
-
-print "\n\n\n\n\nHEEEEEEEEEY\n\n\n\n\n";
-#@EXPORT = qw(public);
 
 1;
