@@ -95,6 +95,12 @@ sub relayMessage {
 
         ### Print the response to the socket
         print $sock "$type $destination :$message\r\n";
-    }
+}
+
+sub rawMessage {
+    my @query = ($_[1] =~ m/\:\:/) ? @_[ 2 .. $#_ ] : @_[ 1 .. $#_ ];
+    my ($raw) = @query;
+    print $sock "$raw\r\n";
+}
 
 1;
