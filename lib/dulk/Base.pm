@@ -4,6 +4,10 @@ package dulk::Base;
     my $bot;
     my %plugins; 
 
+
+    ### XML::Simple for config purposes
+    use XML::Simple;
+
     #constructor
     sub new {
         my $self = {};
@@ -44,7 +48,9 @@ package dulk::Base;
         my @message = @_;
 
         for my $plugin (keys %plugins) {
-            $plugin->public(@message);
+            eval {
+                $plugin->public(@message);
+            };
         }
 
         ## also parse it to dulk::Base
@@ -92,9 +98,14 @@ package dulk::Base;
         loadPlugins();
     }
 
+    sub config {
+        return XMLin("config.xml");
+    }
+
+
     sub public {
-        my @query = @_[ 1 .. $#_ ];
-        my ($raw, $nickname, $message, $destination, $type) = @query;
+        my @input = @_[ 1 .. $#_ ];
+        my ($raw, $nickname, $message, $destination, $type) = @input;
 
         if ($message eq 'rehash') {
             throwError("INFO","Rehash was invoked. Starting now..",__PACKAGE__);
@@ -103,11 +114,11 @@ package dulk::Base;
         }
 
         ### For testing, will remove later
-        #print "\n\n\n0:: $query[0] // 1:: $query[1] // 2:: $query[2] // 3:: $query[3] // 4:: $query[4] // 5:: $query[5] // 6:: $query[6]\n\n\n";
+        #print "\n\n\n0:: $input[0] // 1:: $input[1] // 2:: $input[2] // 3:: $input[3] // 4:: $input[4] // 5:: $input[5] // 6:: $input[6]\n\n\n";
 
     }
 
-    if ($!) { throwError("ERROR","$!",__PACKAGE__); }
+    if ($@) { throwError("ERROR","$@",__PACKAGE__); }
 1;
 
 

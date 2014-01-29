@@ -14,21 +14,21 @@ use dulk::Base;
 my $bot = new dulk::Base;
 
 # The server to connect to and our details.
-my $server = "irc.bracketnet.org";
-my $nick = "dulkbot";
-my $login = "dulkbot";
+my $config = $bot->config();
+my $server = $config->{'server'}->{'address'};
+my $port = $config->{'server'}->{'port'};
+my $nick = $config->{'server'}->{'nickname'};
+my $login = $nick;
 my $status = "";
-
-# The channel which the bot will join.
-my $channel = "#mojitotest";
 
 # Global socket variable
 my $sock;
 
 # Connect to the IRC server.
 sub createSocket {
+
     $sock = new IO::Socket::INET(PeerAddr => $server,
-                                    PeerPort => 6667,
+                                    PeerPort => $port,
                                     Proto => 'tcp') or $bot->throwError("ERROR","Can't connect to IRC server",__PACKAGE__);
     # Log on to the server. Add a check if connected
 
@@ -39,9 +39,17 @@ sub createSocket {
     while (my $input = <$sock>) {
         print $input;
         # Check the numerical responses from the server.
-        if ($input =~ /004/) {
+        if ($input =~ /376/) {
             # We are now logged in. Return a true status
             $status = "connected";
+
+            my $channels = $config->{'server'}->{'channels'}->{'channel'};
+
+            for (my $i=0; defined $channels->[$i]; $i++) {
+                rawMessage("JOIN $channels->[$i]");
+            }
+
+
         }
         elsif ($input =~ /433/) {
             $bot->throwError("ERROR","Nickname is already in use.\n");
@@ -54,8 +62,6 @@ sub createSocket {
 
             if ($status eq "connected") {
                 # I had to create another status (initialized) because it kept trying to join channels when he was already on them.
-                print $sock "JOIN $channel\r\n";
-
                 $status = "initialized";
                 $bot->loadPlugins();
             }
@@ -98,8 +104,14 @@ sub relayMessage {
 }
 
 sub rawMessage {
-    my @query = ($_[1] =~ m/\:\:/) ? @_[ 2 .. $#_ ] : @_[ 1 .. $#_ ];
-    my ($raw) = @query;
+    my @query = @_;
+    if ($#query > 0) {
+        ### If the size is bigger than 0 it might contain plugin references
+        @query = ($_[1] =~ m/\:\:/) ? @_[ 2 .. $#_ ] : @_[ 1 .. $#_ ];
+    }
+
+    my ($raw) = $query[0];
+
     print $sock "$raw\r\n";
 }
 
