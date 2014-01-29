@@ -3,9 +3,6 @@ Description: The idea was to create an IRC Bot from scratch with Perl. dulk uses
 
 ## Todo
 - Module for authing the bot with various IRC network services
-- Create dynamic module loading
--- Make it so that a small help text can be stored and viewed with an command/web interface
--- Hook public subroutine to main public. Once the socket received a message distribute the message amongst the registered plugins
 - Create config structure
 -- Retrieve basic config settings from it (username/server)
 - Enable multi-server support

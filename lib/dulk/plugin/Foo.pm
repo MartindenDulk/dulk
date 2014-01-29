@@ -1,5 +1,7 @@
 package dulk::plugin::Foo;
 
+$|++;
+
 #constructor
 sub new {
   my $self = {};
@@ -12,9 +14,8 @@ my $bot = new dulk::Base;
 
 sub public {
 
-	my @query = @_[ 2 .. $#_ ];
+  my @query = @_[ 2 .. $#_ ];
     my ($raw, $nickname, $message, $destination, $type) = @query;
-	
 
     if ($message eq 'foo') {
         $bot->relayMessage("Foo.pm: Foo","#mojitotest");
@@ -23,7 +24,6 @@ sub public {
     if ($message eq 'martin') {
         $bot->relayMessage("Koffie? :D","#mojitotest");
     }
-
 
 }
 
