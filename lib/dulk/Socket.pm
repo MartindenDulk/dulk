@@ -56,15 +56,14 @@ sub createSocket {
                 # I had to create another status (initialized) because it kept trying to join channels when he was already on them.
                 print $sock "JOIN $channel\r\n";
                 $status = "initialized";
-
-                $bot->loadPlugins();
-
             }
 
             if ($status eq "initialized") {
                 my @data = split(' ',$input);
                 ($data[0]) = ($data[0] =~ m/(?<=:)(.*?)(?=!)/gi);
                 my $query = join(' ',@data[ 3 .. $#data ]);
+                   $query = substr $query, 1; # strip first char (:).
+
                 if ($data[1] eq 'PRIVMSG' && $data[0] =~ m/^(?!dulkbot|StatServ)/gi) {
                     # This qualifies as a message for now. Add a check for services / ignorelist etcetera later.
                     $bot->messageReceived($input, $data[0], $query, $data[2], $data[1]);
@@ -80,7 +79,20 @@ sub createSocket {
 }
 
 sub relayMessage {
-        print $sock "PRIVMSG #mojitotest :Zou dit dan werken?!?\r\n";
+
+    ### The first arrItem is a hashref, sometimes (depends on where this sub is called from) the second one is a hashref too.
+    ### If someone knows a better way to remove these ref items, let me know please.
+    my @query = ($_[1] =~ m/\:\:/) ? @_[ 2 .. $#_ ] : @_[ 1 .. $#_ ];
+    my ($message, $destination, $type) = @query;
+
+        ### If no type defined, make it a privmsg by default
+        $type = ($type) ? $type : "PRIVMSG";
+
+        ## For testing, will remove later
+        #print "\n\n\n0:: $query[0] // 1:: $query[1] // 2:: $query[2] // 3:: $query[3] // 4:: $query[4] // 5:: $query[5] // 6:: $query[6]\n\n\n";
+
+        ### Print the response to the socket
+        print $sock "$type $destination :$message\r\n";
     }
 
 1;

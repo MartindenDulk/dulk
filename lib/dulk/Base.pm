@@ -2,7 +2,7 @@ package dulk::Base;
 
     # global variables
     my $bot;
-
+    my @plugins; 
     #constructor
     sub new {
       my $self = {};
@@ -38,20 +38,6 @@ package dulk::Base;
         else { return "Status unknown."; }
     }
 
-    sub loadPlugins {
-        my $dir = "lib/dulk/plugin";
-        opendir (DIR, $dir) or throwError("Error opening plugin folder:$!",__PACKAGE__);
-
-        while (my $file = readdir(DIR)) {
-          if ($file =~ m/(.*?)(?:\.pm|\.pl)/gi) {
-          my $newModule = $1;
-            require "$file";
-              push(@plugins, "dulk::Plugin::$newModule");
-          }
-        }
-        closedir(DIR);
-    }
-
     sub messageReceived {
       my @message = @_;
 
@@ -59,11 +45,29 @@ package dulk::Base;
         $_->public(@message);
       }
 
+      ## also parse it to dulk::Base
+      public(@message);
+
     }
 
     sub relayMessage {
-      $bot->relayMessage("test");
+      $bot->relayMessage(@_);
     }
+
+
+    sub public {
+      my @query = @_[ 1 .. $#_ ];
+        my ($raw, $nickname, $message, $destination, $type) = @query;
+
+        if ($message eq 'foo') {
+          relayMessage("message","#destination");
+        }
+
+        ### For testing, will remove later
+        #print "\n\n\n0:: $query[0] // 1:: $query[1] // 2:: $query[2] // 3:: $query[3] // 4:: $query[4] // 5:: $query[5] // 6:: $query[6]\n\n\n";
+      
+    }
+    if ($!) { throwError("$!",__PACKAGE__); }
 1;
 
 

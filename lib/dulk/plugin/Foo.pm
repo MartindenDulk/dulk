@@ -1,29 +1,26 @@
-package dulk::Plugin::Foo;
+package dulk::plugin::Foo;
 
 #constructor
 sub new {
   my $self = {};
-  bless $self, 'dulk::Plugin::Foo';
+  bless $self, 'dulk::plugin::Foo';
   return $self;
 }
 
 use dulk::Base;
-
 my $bot = new dulk::Base;
 
 sub public {
+	my @query = @_[ 2 .. $#_ ];
+    my ($raw, $nickname, $message, $destination, $type) = @query;
+	
 
-#use Data::Dumper;
-#die Dumper(@_);
-
-    my ($plugin, $referrer, $raw, $nickname, $message, $destination, $type) = @_;
-
-
-    print "/$message/";
-    if ($message eq ':command') {
-        $bot->relayMessage();
+    if ($message eq 'foo') {
+        $bot->relayMessage("Foo.pm: Foo","#mojitotest");
     }
+
 }
 
+@EXPORT = qw(public);
 
 1;
