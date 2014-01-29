@@ -56,6 +56,10 @@ package dulk::Base;
         $bot->relayMessage(@_);
     }
 
+    sub rawMessage {
+        $bot->rawMessage(@_);
+    }
+
 
     sub loadPlugins {
 
@@ -91,10 +95,6 @@ package dulk::Base;
     sub public {
         my @query = @_[ 1 .. $#_ ];
         my ($raw, $nickname, $message, $destination, $type) = @query;
-
-        if ($message eq 'foo') {
-            relayMessage("Base.pm","#mojitotest");
-        }
 
         if ($message eq 'rehash') {
             throwError("INFO","Rehash was invoked. Starting now..",__PACKAGE__);
