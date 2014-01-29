@@ -2,12 +2,13 @@ package dulk::Base;
 
     # global variables
     my $bot;
-    my @plugins; 
+    my %plugins; 
+
     #constructor
     sub new {
-      my $self = {};
-      bless $self, 'dulk::Base';
-      return $self;
+        my $self = {};
+        bless $self, 'dulk::Base';
+        return $self;
     }
 
 
@@ -27,6 +28,7 @@ package dulk::Base;
 
     # Status handling. Set & Get.
     my $status = "";
+
     sub setStatus {
         (my $statusMessage) = @_;
         if (defined $statusMessage) { $status = $statusMessage."\n"; }
@@ -39,34 +41,71 @@ package dulk::Base;
     }
 
     sub messageReceived {
-      my @message = @_;
+        my @message = @_;
 
-      foreach(@plugins) {
-        $_->public(@message);
-      }
+        for my $plugin (keys %plugins) {
+            $plugin->public(@message);
+        }
 
-      ## also parse it to dulk::Base
-      public(@message);
+        ## also parse it to dulk::Base
+        public(@message);
 
     }
 
     sub relayMessage {
-      $bot->relayMessage(@_);
+        $bot->relayMessage(@_);
     }
 
 
+    sub loadPlugins {
+
+        my $dir = "lib/dulk/plugin";
+        opendir (DIR, $dir) or throwError("Error opening plugin folder:$!",__PACKAGE__);
+
+        while (my $file = readdir(DIR)) {
+            if ($file =~ m/(.*?)(?:\.pm|\.pl)/gi) {
+
+                # Add plugin to plugins hash
+                $plugins{"dulk::plugin::$1"} = "$file";
+                require "$file";
+
+            }
+        }
+        closedir(DIR);
+    }
+
+    sub reloadPlugins {
+        # Clear previous stored data
+        for my $plugin (keys %plugins) {
+            # remove already loaded plugins from INC
+            delete $INC{ $plugins{$plugin} };
+        }
+
+        # once INC is clear, clear the plugins hash also
+        undef %plugins;
+
+        # load the plugins again
+        loadPlugins();
+    }
+
     sub public {
-      my @query = @_[ 1 .. $#_ ];
+        my @query = @_[ 1 .. $#_ ];
         my ($raw, $nickname, $message, $destination, $type) = @query;
 
         if ($message eq 'foo') {
-          relayMessage("message","#destination");
+            relayMessage("message","#destination");
+        }
+
+        if ($message eq 'rehash') {
+            relayMessage("Will try to reload now","#mojitotest");
+            reloadPlugins();
         }
 
         ### For testing, will remove later
         #print "\n\n\n0:: $query[0] // 1:: $query[1] // 2:: $query[2] // 3:: $query[3] // 4:: $query[4] // 5:: $query[5] // 6:: $query[6]\n\n\n";
-      
+
     }
+
     if ($!) { throwError("$!",__PACKAGE__); }
 1;
 

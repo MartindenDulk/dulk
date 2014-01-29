@@ -56,6 +56,7 @@ sub createSocket {
                 # I had to create another status (initialized) because it kept trying to join channels when he was already on them.
                 print $sock "JOIN $channel\r\n";
                 $status = "initialized";
+                $bot->loadPlugins();
             }
 
             if ($status eq "initialized") {
