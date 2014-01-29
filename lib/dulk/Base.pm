@@ -22,8 +22,8 @@ package dulk::Base;
 
     # Error handling. Just a print to console. We could make this configurable. Perhaps relayed to the debug channel?
     sub throwError {
-        (my $errorMessage, $errorScript) = @_;
-        print "[ERROR - $errorScript] $errorMessage\n";
+        (my $messageType, $message, $script) = @_;
+        print "[$messageType - $script] $message\n";
     }
 
     # Status handling. Set & Get.
@@ -32,7 +32,7 @@ package dulk::Base;
     sub setStatus {
         (my $statusMessage) = @_;
         if (defined $statusMessage) { $status = $statusMessage."\n"; }
-        else { throwError("Tried to set the status with an undefined message",__PACKAGE__); }
+        else { throwError("ERROR","Tried to set the status with an undefined message",__PACKAGE__); }
     }
 
     sub getStatus {
@@ -60,7 +60,7 @@ package dulk::Base;
     sub loadPlugins {
 
         my $dir = "lib/dulk/plugin";
-        opendir (DIR, $dir) or throwError("Error opening plugin folder:$!",__PACKAGE__);
+        opendir (DIR, $dir) or throwError("ERROR","Error opening plugin folder:$!",__PACKAGE__);
 
         while (my $file = readdir(DIR)) {
             if ($file =~ m/(.*?)(?:\.pm|\.pl)/gi) {
@@ -93,12 +93,13 @@ package dulk::Base;
         my ($raw, $nickname, $message, $destination, $type) = @query;
 
         if ($message eq 'foo') {
-            relayMessage("message","#destination");
+            relayMessage("Base.pm","#mojitotest");
         }
 
         if ($message eq 'rehash') {
-            relayMessage("Will try to reload now","#mojitotest");
+            throwError("INFO","Rehash was invoked. Starting now..",__PACKAGE__);
             reloadPlugins();
+            throwError("INFO","Rehash has completed.",__PACKAGE__);
         }
 
         ### For testing, will remove later
@@ -106,7 +107,7 @@ package dulk::Base;
 
     }
 
-    if ($!) { throwError("$!",__PACKAGE__); }
+    if ($!) { throwError("ERROR","$!",__PACKAGE__); }
 1;
 
 

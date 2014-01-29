@@ -29,7 +29,7 @@ my $sock;
 sub createSocket {
     $sock = new IO::Socket::INET(PeerAddr => $server,
                                     PeerPort => 6667,
-                                    Proto => 'tcp') or $bot->throwError("Can't connect to IRC server",__PACKAGE__);
+                                    Proto => 'tcp') or $bot->throwError("ERROR","Can't connect to IRC server",__PACKAGE__);
     # Log on to the server. Add a check if connected
 
     print $sock "NICK $nick\r\n";
@@ -44,7 +44,7 @@ sub createSocket {
             $status = "connected";
         }
         elsif ($input =~ /433/) {
-            $bot->throwError("Nickname is already in use.\n");
+            $bot->throwError("ERROR","Nickname is already in use.\n");
         }
         elsif ($input =~ /^PING(.*)$/i) {
             print $sock "PONG $1\r\n";
@@ -55,6 +55,7 @@ sub createSocket {
             if ($status eq "connected") {
                 # I had to create another status (initialized) because it kept trying to join channels when he was already on them.
                 print $sock "JOIN $channel\r\n";
+
                 $status = "initialized";
                 $bot->loadPlugins();
             }
@@ -63,10 +64,10 @@ sub createSocket {
                 my @data = split(' ',$input);
                 ($data[0]) = ($data[0] =~ m/(?<=:)(.*?)(?=!)/gi);
                 my $query = join(' ',@data[ 3 .. $#data ]);
-                   $query = substr $query, 1; # strip first char (:).
 
                 if ($data[1] eq 'PRIVMSG' && $data[0] =~ m/^(?!dulkbot|StatServ)/gi) {
                     # This qualifies as a message for now. Add a check for services / ignorelist etcetera later.
+                    $query = substr $query, 1; # strip first char (:).
                     $bot->messageReceived($input, $data[0], $query, $data[2], $data[1]);
                   }
             }

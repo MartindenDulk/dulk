@@ -20,5 +20,3 @@ my $bot = new dulk::Base;
 
 # Connect and check status if it´s connected
 my $status = $bot->connect();
-
-
