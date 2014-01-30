@@ -48,9 +48,9 @@ package dulk::Base;
         my @message = @_;
 
         for my $plugin (keys %plugins) {
-            eval {
+            if ($plugin->can(public)) {
                 $plugin->public(@message);
-            };
+            } 
         }
 
         ## also parse it to dulk::Base
