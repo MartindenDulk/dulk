@@ -1,22 +1,54 @@
 #!/usr/bin/perl -w
-# irc.pl
-# A simple IRC robot.
-# Usage: perl irc.pl
 
-# define our own lib dir
-use FindBin qw($RealBin);
-use lib "$RealBin/lib/";
-use lib "$RealBin/lib/dulk/plugin";
+#########################################################
+### 
+### File: dulk.pl
+### Author: Martin den Dulk
+### Contact: martin@dendulk.org
+### 
+### ======
+### 
+### This file was created for the dulk IRC bot repository
+### on GitHub. See: https://github.com/MartindenDulk/dulk 
+### 
+### ======
+### 
+### USAGE
+### Make sure this .pl file is executable. Fill in
+### the dummy config file. Save it as config.xml.
+### Execute this .pl file
+### 
+#########################################################
 
-# Add some Modules we need
-use strict;
-use Data::Dumper;
-use dulk::Base; # Handles socket connections / Errors / ...
+
+##########################################################
+### LIB SETTINGS
+##########################################################
+
+    use FindBin qw($RealBin);
+    use lib "$RealBin/lib/";
+    use lib "$RealBin/lib/dulk/plugin";
+
+##########################################################
+### USED MODULES
+##########################################################
+    use strict;
+    use Data::Dumper;
+    use dulk::Base; # Handles socket connections / Errors / ...
+
+##########################################################
+### START PRINT
+##########################################################
 
 $|++;
 
-# Global variable 
-my $bot = new dulk::Base;
+##########################################################
+### GLOBAL VARIABLES
+##########################################################
 
-# Connect and check status if it´s connected
+    my $bot = new dulk::Base;
+
+##########################################################
+### RETRIEVE STATUS
+##########################################################
 my $status = $bot->connect();
