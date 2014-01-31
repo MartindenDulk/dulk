@@ -1,22 +1,44 @@
-package dulk::Base;
+#########################################################
+### 
+### File: Base.pm
+### Author: Martin den Dulk
+### Contact: martin@dendulk.org
+### 
+### ======
+### 
+### This file was created for the dulk IRC bot repository
+### on GitHub. See: https://github.com/MartindenDulk/dulk 
+### 
+#########################################################
 
-    # global variables
-    my $bot;
-    my %plugins; 
+    package dulk::Base;
 
-
-    ### XML::Simple for config purposes
-    use XML::Simple;
-
-    #constructor
     sub new {
         my $self = {};
         bless $self, 'dulk::Base';
         return $self;
     }
 
+#########################################################
+### USED MODULES
+#########################################################
 
-    # Socket connect.
+    ### XML::Simple for config purposes
+    use XML::Simple;
+
+#########################################################
+### GLOBAL VARIABLES
+#########################################################
+
+    my $bot;
+    my %plugins; 
+    my $status = "";
+
+#########################################################
+### CONNECT SUBROUTINES
+#########################################################
+
+    ### Connect to the socket using dulk::Socket
     sub connect {
         require dulk::Socket;
         $bot = new dulk::Socket;
@@ -24,14 +46,19 @@ package dulk::Base;
         setStatus($socket);
     }
 
-    # Error handling. Just a print to console. We could make this configurable. Perhaps relayed to the debug channel?
+#########################################################
+### ERROR HANDLING
+#########################################################
+
+    ### When an error occurs it's printed to console. We could make this configurable. Perhaps relayed to the debug channel?
     sub throwError {
         (my $messageType, $message, $script) = @_;
         print "[$messageType - $script] $message\n";
     }
 
-    # Status handling. Set & Get.
-    my $status = "";
+#########################################################
+### STATUS HANDLING
+#########################################################
 
     sub setStatus {
         (my $statusMessage) = @_;
@@ -44,16 +71,22 @@ package dulk::Base;
         else { return "Status unknown."; }
     }
 
+#########################################################
+### MESSAGE SUBROUTINES
+#########################################################
+
     sub messageReceived {
         my @message = @_;
 
+        ### When a message is received, check the global plugin var if the looped plugin has a public subroutine.
+        ### If so, relay the message to that subroutine.
         for my $plugin (keys %plugins) {
             if ($plugin->can(public)) {
                 $plugin->public(@message);
             } 
         }
 
-        ## also parse it to dulk::Base
+        ### also parse it to dulk::Base
         public(@message);
 
     }
@@ -65,43 +98,6 @@ package dulk::Base;
     sub rawMessage {
         $bot->rawMessage(@_);
     }
-
-
-    sub loadPlugins {
-
-        my $dir = "lib/dulk/plugin";
-        opendir (DIR, $dir) or throwError("ERROR","Error opening plugin folder:$!",__PACKAGE__);
-
-        while (my $file = readdir(DIR)) {
-            if ($file =~ m/(.*?)(?:\.pm|\.pl)/gi) {
-
-                # Add plugin to plugins hash
-                $plugins{"dulk::plugin::$1"} = "$file";
-                require "$file";
-
-            }
-        }
-        closedir(DIR);
-    }
-
-    sub reloadPlugins {
-        # Clear previous stored data
-        for my $plugin (keys %plugins) {
-            # remove already loaded plugins from INC
-            delete $INC{ $plugins{$plugin} };
-        }
-
-        # once INC is clear, clear the plugins hash also
-        undef %plugins;
-
-        # load the plugins again
-        loadPlugins();
-    }
-
-    sub config {
-        return XMLin("config.xml");
-    }
-
 
     sub public {
         my @input = @_[ 1 .. $#_ ];
@@ -118,13 +114,45 @@ package dulk::Base;
 
     }
 
+#########################################################
+### PLUGIN/CONFIG SUBROUTINES
+#########################################################
+
+    sub loadPlugins {
+
+        ### Check the lib/dulk/plugin directory for .pm|.pl files. If found, load it/them
+        my $dir = "lib/dulk/plugin";
+        opendir (DIR, $dir) or throwError("ERROR","Error opening plugin folder:$!",__PACKAGE__);
+
+        while (my $file = readdir(DIR)) {
+            if ($file =~ m/(.*?)(?:\.pm|\.pl)/gi) {
+
+                ### Add found plugin file to plugins hash
+                $plugins{"dulk::plugin::$1"} = "$file";
+                require "$file";
+
+            }
+        }
+        closedir(DIR);
+    }
+
+    sub reloadPlugins {
+        ### Start off fresh, delete all loaded plugins from INC
+        for my $plugin (keys %plugins) {
+            delete $INC{ $plugins{$plugin} };
+        }
+
+        ### once INC is clear, clear the plugins hash also
+        undef %plugins;
+
+        ### load the plugins again
+        loadPlugins();
+    }
+
+    sub config {
+        return XMLin("config.xml");
+    }
+
     if ($@) { throwError("ERROR","$@",__PACKAGE__); }
+
 1;
-
-
-
-
-
-
-
-
