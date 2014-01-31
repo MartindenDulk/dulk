@@ -1,79 +1,115 @@
+
+#########################################################
+### 
+### File: Socket.pm 
+### Author: Martin den Dulk
+### Contact: martin@dendulk.org
+### 
+### ======
+### 
+### This file was created for the dulk IRC bot repository
+### on GitHub. See: https://github.com/MartindenDulk/dulk 
+### 
+#########################################################
+
 package dulk::Socket;
 
-#constructor
 sub new {
   my $self = {};
   bless $self, 'dulk::Socket';
   return $self;
 }
 
-# We will use a raw socket to connect to the IRC server.
-use IO::Socket;
-use dulk::Base;
+#########################################################
+### USED MODULES 
+#########################################################
+    use IO::Socket;
+    use dulk::Base;
 
-my $bot = new dulk::Base;
 
-# The server to connect to and our details.
-my $config = $bot->config();
-my $server = $config->{'server'}->{'address'};
-my $port = $config->{'server'}->{'port'};
-my $nick = $config->{'server'}->{'nickname'};
-my $login = $nick;
-my $status = "";
+#########################################################
+### GLOBAL VARIABLES 
+#########################################################
 
-# Global socket variable
-my $sock;
+    ### Main bot var
+    my $bot = new dulk::Base;
 
-# Connect to the IRC server.
+    ### Server vars
+    my $config = $bot->config();
+    my $server = $config->{'server'}->{'address'};
+    my $port = $config->{'server'}->{'port'};
+    my @nicknames = ($config->{'server'}->{'nickname'}, $config->{'server'}->{'altnickname'});
+    my $status = "";
+
+    ### Global socket variable
+    my $sock;
+
+#########################################################
+### SOCKET SUBROUTINES 
+#########################################################
+
 sub createSocket {
 
     $sock = new IO::Socket::INET(PeerAddr => $server,
                                     PeerPort => $port,
                                     Proto => 'tcp') or $bot->throwError("ERROR","Can't connect to IRC server",__PACKAGE__);
-    # Log on to the server. Add a check if connected
+    ### Log on to the server. Add a check if connected
 
-    print $sock "NICK $nick\r\n";
-    print $sock "USER $login 8 * :Perl IRC Hacks Robot\r\n";
+    print $sock "NICK $nicknames[0]\r\n";
+    print $sock "USER $nicknames[0] 8 * :Perl IRC Hacks Robot\r\n";
 
-    # Read lines from the server until it tells us we have connected.
+    ### Read lines from the socket
     while (my $input = <$sock>) {
+        ### When input is received, print it to the console. Might add logging here later on
         print $input;
-        # Check the numerical responses from the server.
+
+        ### Check the numerical responses from the server
         if ($input =~ /376/) {
-            # We are now logged in. Return a true status
+            ### 376 means we´ re logged in. Update the status
             $status = "connected";
 
             my $channels = $config->{'server'}->{'channels'}->{'channel'};
 
-            for (my $i=0; defined $channels->[$i]; $i++) {
-                rawMessage("JOIN $channels->[$i]");
+            if ($config->{'server'}->{'channels'}->{'channel'}->[1]) {
+                ### If there's multiple channels in the config enter a for loop
+                for (my $i=0; defined $channels->[$i]; $i++) {
+                    rawMessage("JOIN $channels->[$i]");
+                }
+            } else {
+            ### Only one channel in the config, join it
+                    rawMessage("JOIN $channels");
             }
-
 
         }
         elsif ($input =~ /433/) {
             $bot->throwError("ERROR","Nickname is already in use.\n");
         }
         elsif ($input =~ /^PING(.*)$/i) {
+            ### Return print for PING CTCP events, this prevents us from time-outs
             print $sock "PONG $1\r\n";
         }
         if ($status eq "connected" || $status eq "initialized") {
-            # We are connected. Do something with the input we are receiving.
+            ### We are connected. Do something with the input we are receiving
 
             if ($status eq "connected") {
-                # I had to create another status (initialized) because it kept trying to join channels when he was already on them.
+                ### I had to create another status (initialized) because it kept trying to join channels when he was already on them.
                 $status = "initialized";
                 $bot->loadPlugins();
             }
 
             if ($status eq "initialized") {
+                ### Start of extracting data that we need later on
                 my @data = split(' ',$input);
                 ($data[0]) = ($data[0] =~ m/(?<=:)(.*?)(?=!)/gi);
+
+                ### Everything after 3 is the ´query´ of the user. Put that in a scalar
                 my $query = join(' ',@data[ 3 .. $#data ]);
 
                 if ($data[1] eq 'PRIVMSG' && $data[0] =~ m/^(?!dulkbot|StatServ)/gi) {
-                    # This qualifies as a message for now. Add a check for services / ignorelist etcetera later.
+                    ### This qualifies as a message for now. Add a check for services / ignorelist etcetera later.
                     $query = substr $query, 1; # strip first char (:).
+
+                    ### Parse our earlier collected data to our main messageReceived function
                     $bot->messageReceived($input, $data[0], $query, $data[2], $data[1]);
                   }
             }
@@ -85,6 +121,10 @@ sub createSocket {
     if ($@) { die "Mad error, yo: ". $@; }
     return $status;
 }
+
+#########################################################
+### MESSAGE SUBROUTINES 
+#########################################################
 
 sub relayMessage {
 
