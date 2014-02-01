@@ -56,7 +56,7 @@ sub createSocket {
     ### Log on to the server. Add a check if connected
 
     print $sock "NICK $nicknames[0]\r\n";
-    print $sock "USER $nicknames[0] 8 * :Perl IRC Hacks Robot\r\n";
+    print $sock "USER $nicknames[0] 8 * :dulk IRC bot by Martin den Dulk - https://github.com/MartindenDulk/dulk\r\n";
 
     ### Read lines from the socket
     while (my $input = <$sock>) {
@@ -78,6 +78,18 @@ sub createSocket {
             } else {
             ### Only one channel in the config, join it
                     rawMessage("JOIN $channels");
+            }
+
+            ### Authentication
+            if ($config->{'server'}->{'authmode'}) {
+                if ($config->{'server'}->{'authmode'} eq 'NickServ') {
+                    if ($config->{'server'}->{'authpassword'}) {
+                        ### If a password is known, advance
+                        $bot->relayMessage("IDENTIFY $config->{'server'}->{'authpassword'}","NickServ");
+                        } else {
+                            $bot->throwError("ERROR","Tried to auth but no password is know. Please add to your config.",__PACKAGE__);
+                    }
+                }
             }
 
         }
@@ -130,7 +142,14 @@ sub relayMessage {
 
     ### The first arrItem is a hashref, sometimes (depends on where this sub is called from) the second one is a hashref too.
     ### If someone knows a better way to remove these ref items, let me know please.
-    my @query = ($_[1] =~ m/\:\:/) ? @_[ 2 .. $#_ ] : @_[ 1 .. $#_ ];
+
+
+use Data::Dumper;
+    shift @_;
+    if (ref($_[0])) { shift @_; }
+
+    my @query = @_;
+
     my ($message, $destination, $type) = @query;
 
         ### If no type defined, make it a privmsg by default
