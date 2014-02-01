@@ -2,10 +2,8 @@
 Description: The idea was to create an IRC Bot from scratch with Perl. dulk uses IO::Socket as the fundament for the connection and the plan is to create everything around it ourselves.
 
 ## Todo
-- Module for authing the bot with various IRC network services
-- Create config structure
--- Retrieve basic config settings from it (username/server)
-- Enable multi-server support
+- Auto-reconnect on d/c
+- Register plugin commands to be able to show a help text with the commands
 
 ## About
 Project was started by Martin den Dulk. For more info or questions hit me up at irc.bracketnet.org / #nl / User: Mojito
