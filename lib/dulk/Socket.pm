@@ -94,7 +94,8 @@ sub createSocket {
 
         }
         elsif ($input =~ /433/) {
-            $bot->throwError("ERROR","Nickname is already in use.\n");
+            $bot->throwError("ERROR","Nickname is already in use.. Trying alternative\n");
+            print $sock "NICK $nicknames[1] \r\n";
         }
         elsif ($input =~ /^PING(.*)$/i) {
             ### Return print for PING CTCP events, this prevents us from time-outs
@@ -128,9 +129,6 @@ sub createSocket {
 
         }
     }
-
-
-    if ($@) { die "Mad error, yo: ". $@; }
     return $status;
 }
 
