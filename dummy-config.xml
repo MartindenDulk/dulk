@@ -1,0 +1,22 @@
+<!-- DUMMY CONFIG FILE -->
+<!-- Fill in your details and rename this file to config.xml -->
+
+<config>
+    <server>
+        <name>Name of the Network</name>
+        <address>irc.somenetwork.org</address>
+        <port>6667</port>
+        <nickname>dulkbot</nickname>
+        <altnickname>dulk-bot</altnickname>
+        <autoconnect>true</autoconnect>
+        <authmode>NickServ</authmode>
+        <authpassword>lordpleasechangeme</authpassword>
+        <channels>
+            <channel>#dulkbot</channel>
+        </channels>
+    </server>
+    <settings>
+        <!-- Uncomment the line below to disable info/error messages in the console. They will be relayed to this channel.
+        <!-- <errorchannel>#dulkbot</errorchannel> -->
+    </settings>
+</config>

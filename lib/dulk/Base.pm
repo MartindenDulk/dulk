@@ -33,6 +33,8 @@
     my $bot;
     my %plugins; 
     my $status = "";
+    my $config = config();
+    my $settings = $config->{'settings'};
 
 #########################################################
 ### CONNECT SUBROUTINES
@@ -52,8 +54,16 @@
 
     ### When an error occurs it's printed to console. We could make this configurable. Perhaps relayed to the debug channel?
     sub throwError {
+        if (ref($_[0])) { shift @_; }
+
         (my $messageType, $message, $script) = @_;
-        print "[$messageType - $script] $message\n";
+        if ($settings->{'errorchannel'}) {
+            ### If a errochannel is defined in the config, relay the errors to that channel
+            relayMessage("[$messageType - $script] $message","$settings->{'errorchannel'}");
+        } else {
+            ### If not, print to console
+            print "[$messageType - $script] $message\n";
+        }
     }
 
 #########################################################
