@@ -25,6 +25,7 @@
 
     ### XML::Simple for config purposes
     use XML::Simple;
+    use dulk::User;
 
 #########################################################
 ### GLOBAL VARIABLES
@@ -32,9 +33,12 @@
 
     my $bot;
     my %plugins; 
+    my %commands;
     my $status = "";
     my $config = config();
     my $settings = $config->{'settings'};
+    my $server = $config->{'server'};
+    my $user = new dulk::User;
 
 #########################################################
 ### CONNECT SUBROUTINES
@@ -57,8 +61,8 @@
         if (ref($_[0])) { shift @_; }
 
         (my $messageType, $message, $script) = @_;
-        if ($settings->{'errorchannel'}) {
-            ### If a errochannel is defined in the config, relay the errors to that channel
+        if ($settings->{'errorchannel'} && $status =~ m/connected|initialized/gi) {
+            ### If a errochannel is defined in the config and we are connected, relay the errors to that channel
             relayMessage("[$messageType - $script] $message","$settings->{'errorchannel'}");
         } else {
             ### If not, print to console
@@ -112,11 +116,40 @@
     sub public {
         my @input = @_[ 1 .. $#_ ];
         my ($raw, $nickname, $message, $destination, $type) = @input;
+        my @query = split(' ',$message);
 
-        if ($message eq 'rehash') {
-            throwError("INFO","Rehash was invoked. Starting now..",__PACKAGE__);
-            reloadPlugins();
-            throwError("INFO","Rehash has completed.",__PACKAGE__);
+        ### If the first query array item matches your prefix in your config, start looking for replies.
+        if ($settings->{'prefix'} && $query[0] eq $settings->{'prefix'}) {
+            @query = @query[1 .. $#_];
+
+            ### Rehash command
+            ### - The user that invokes this command needs to have the 'rehash' right added in the users.xml. See the README for more information.
+            if ($query[0] eq 'rehash' && $user->userCan("rehash",@input)) {
+                throwError("INFO","Rehash was invoked. Starting now..",__PACKAGE__);
+                reloadPlugins();
+                throwError("INFO","Rehash has completed.",__PACKAGE__);
+            }
+
+            ### Help command
+            if ($query[0] eq 'help') {
+                relayMessage("Curious on what I can do? Try PMing me with 'commands'.",$destination);
+            }
+
+            ### Register command
+            if ($query[0] eq 'register') {
+                $user->registerUser(@input);
+            }
+
+
+        }
+        if ($destination =~ m/($server->{'nickname'}|$server->{'altnickname'})/) {
+            if ($query[0] eq 'commands') {
+                relayMessage("[INFO] Gathering command information for you now.",$nickname);
+                for my $command (keys %commands) {
+                    relayMessage("$command - $commands{$command}",$nickname);
+                }
+                relayMessage("[INFO] Done. All commands have been relayed to you.",$nickname);
+            }
         }
 
         ### For testing, will remove later
@@ -157,6 +190,11 @@
 
         ### load the plugins again
         loadPlugins();
+    }
+
+    sub registerCommand {
+        my ($package, $command, $help) = @_;
+        $commands{$command} = $help;
     }
 
     sub config {
