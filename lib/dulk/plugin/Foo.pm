@@ -20,6 +20,7 @@
 #########################################################
 
   use dulk::Base;
+  use dulk::User;
 
 #########################################################
 ### GLOBAL VARIABLES
@@ -27,6 +28,7 @@
 
   my $bot = new dulk::Base;
   my $config = $bot->config();
+  my $user = new dulk::User;
 
 #########################################################
 ### SUBROUTINES
@@ -53,9 +55,20 @@
 
         ### Dummy command. Boot the bot and say 'foo' in the channel he's on. It will show the response stated below.
         if ($query[0] eq 'foo') {
-
           ### Yep, 'foo' was said. Let's talk back!
           $bot->relayMessage("Hey! I just received $query[0] from $nickname on $destination. The full command was $message",$destination);
+        }
+
+        if ($query[0] eq 'foo') {
+          ### Yep, 'foo' was said. Let's talk back!
+          $bot->relayMessage("Hey! I just received $query[0] from $nickname on $destination. The full command was $message",$destination);
+        }
+
+        ### Authorized command. If the user has the rights flag 'bar' set, this will reply a message
+        if ($query[0] eq 'bar' && $user->userCan("bar",@input)) {
+          $bot->relayMessage("Yep, you're legit. Hooray for power!",$destination);
+        } elsif ($query[0] eq 'bar' && !$user->userCan("bar",@input)) {
+          $bot->relayMessage("Uh oh, you don´t have the ´bar´ rights/flag set in your users.xml. You don´t get a funny response ;(",$destination);
         }
 
 
