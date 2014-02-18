@@ -40,6 +40,7 @@
 
     sub registerUser {
         my @input = @_[ 1 .. $#_ ];
+        my ($raw, $nickname, $message, $destination, $type, $hostname) = @input;
 
         ### Make sure we've got the latest user data
         loadUsers();
@@ -64,7 +65,7 @@
         loadUsers();
 
         my $checkUser = $users->{$nickname};
-        if ($checkUser->{'rights'} =~ m/$command/gi && $checkUser->{'hostname'} eq $hostname) {
+        if ($checkUser->{'rights'} =~ m/$command/gi || $checkUser->{'rights'} =~ m/global-admin/gi && $checkUser->{'hostname'} eq $hostname) {
             return "true";
         } 
     }
