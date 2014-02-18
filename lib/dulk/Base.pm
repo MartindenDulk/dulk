@@ -95,7 +95,7 @@
         ### When a message is received, check the global plugin var if the looped plugin has a public subroutine.
         ### If so, relay the message to that subroutine.
         for my $plugin (keys %plugins) {
-            if ($plugin->can(public)) {
+            if ($plugin->can('public')) {
                 $plugin->public(@message);
             } 
         }
@@ -123,14 +123,14 @@
             @query = @query[1 .. $#_];
 
             ### Rehash command
-            ### - The user that invokes this command needs to have the 'rehash' right added in the users.xml. See the README for more information.
+            ### - The user that invokes this command needs to have the 'rehash' or the 'global-admin' right added in the users.xml. See the README for more information.
             if ($query[0] eq 'rehash' && $user->userCan("rehash",@input)) {
                 throwError("INFO","Rehash was invoked. Starting now..",__PACKAGE__);
                 reloadPlugins();
                 throwError("INFO","Rehash has completed.",__PACKAGE__);
             }
 
-            ### - The user that invokes these two commands needs to have the 'admin-users' right added in the users.xml. See the README for more information.
+            ### - The user that invokes these two commands needs to have the 'admin-users' or the 'global-admin' right added in the users.xml. See the README for more information.
             if ($query[0] eq 'grant' && $user->userCan("admin-users",@input)) {
                 my $grantMessage = $user->grantUser($query[1], $query[2], $destination);
                 relayMessage($grantMessage,$destination);
@@ -155,18 +155,28 @@
         }
         if ($destination =~ m/($server->{'nickname'}|$server->{'altnickname'})/) {
             if ($query[0] eq 'commands') {
-                relayMessage("[INFO] Gathering command information for you now.",$nickname);
                 for my $command (keys %commands) {
-                    relayMessage("$command - $commands{$command}",$nickname);
+
+                    my $commandMessage = "['$command']";
+                    $commandMessage .= ($commands{$command}->{"rights"}) ? "[$commands{$command}->{'rights'}] " : " ";
+                    $commandMessage .= $commands{$command}->{'description'};
+
+                    relayMessage("$commandMessage",$nickname);
                 }
-                relayMessage("[INFO] Done. All commands have been relayed to you.",$nickname);
             }
         }
 
-        ### For testing, will remove later
-        #print "\n\n\n0:: $input[0] // 1:: $input[1] // 2:: $input[2] // 3:: $input[3] // 4:: $input[4] // 5:: $input[5] // 6:: $input[6]\n\n\n";
-
     }
+
+
+#########################################################
+### REGISTRATION OF COMMANDS
+#########################################################
+
+    registerCommand("dulk::Base","commands","Displays this lovely help text");
+    registerCommand("dulk::Base","register","Register yourself as a user.");
+    registerCommand("dulk::Base","grant/revoke","Grant or revoke user rights","global-admin");
+    registerCommand("dulk::Base","rehash","Command used to reload all scripts & config files","global-admin");
 
 #########################################################
 ### PLUGIN/CONFIG SUBROUTINES
@@ -204,8 +214,11 @@
     }
 
     sub registerCommand {
-        my ($package, $command, $help) = @_;
-        $commands{$command} = $help;
+        my ($package, $command, $help, $rights) = @_;
+        $commands{$command}{'description'} = "$help";
+        if ($rights) {
+            $commands{$command}{'rights'} = "$rights";
+        }
     }
 
     sub config {
