@@ -18,5 +18,6 @@
     <settings>
         <!-- Uncomment the line below to disable info/error messages in the console. They will be relayed to this channel.
         <!-- <errorchannel>#dulkbot</errorchannel> -->
+        <prefix>dulkbot</prefix>
     </settings>
 </config>
