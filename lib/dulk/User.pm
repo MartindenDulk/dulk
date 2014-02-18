@@ -40,7 +40,6 @@
 
     sub registerUser {
         my @input = @_[ 1 .. $#_ ];
-        my ($raw, $nickname, $message, $destination, $type, $hostname) = @input;
 
         ### Make sure we've got the latest user data
         loadUsers();
@@ -50,9 +49,7 @@
             $users->{$nickname}->{'rights'} = 'default';
             $users->{$nickname}->{'hostname'} = $hostname;
 
-            open my $fh, ">", "users.xml" or die "$0: open users.xml: $!";
-            print $fh XMLout($users);
-            close $fh or warn "$0: close users.xml: $!";
+            saveUsers();
 
             $bot->relayMessage("You've been added with the default priviledges. Welcome!", $destination);
         }
@@ -68,12 +65,54 @@
 
         my $checkUser = $users->{$nickname};
         if ($checkUser->{'rights'} =~ m/$command/gi && $checkUser->{'hostname'} eq $hostname) {
-            print "true";
+            return "true";
         } 
     }
 
     sub loadUsers {
         $users = XMLin("users.xml");
+    }
+
+    sub saveUsers {
+            open my $fh, ">", "users.xml" or die "$0: open users.xml: $!";
+            print $fh XMLout($users);
+            close $fh or warn "$0: close users.xml: $!";
+    }
+
+    ### Subroutine to grant user rights
+    sub grantUser {
+        my ($package, $nickname, $command) = @_;
+
+        if ($users->{$nickname}) {
+            ### User is known, add the rights
+            $users->{$nickname}->{'rights'} .= " $command";
+
+            saveUsers();
+
+            return "[INFO] $nickname has been granted '$command' priviledges";
+        } else {
+            ### User is unknown
+            return "[ERROR] $nickname has not registered with me. Use '$settings->{'prefix'} register' to register.";
+        }
+
+    }
+
+    ### Subroutine to revoke user rights
+    sub revokeUser {
+        my ($package, $nickname, $command) = @_;
+
+        if ($users->{$nickname}) {
+            ### User is known, add the rights
+            $users->{$nickname}->{'rights'} =~ s/$command//gi;
+
+            saveUsers();
+
+            return "[INFO] $command priviledge has been revoked from $nickname";
+        } else {
+            ### User is unknown
+            return "[ERROR] $nickname has not registered with me. Nothing was revoked.";
+        }
+
     }
 
     if ($@) { throwError("ERROR","$@",__PACKAGE__); }
