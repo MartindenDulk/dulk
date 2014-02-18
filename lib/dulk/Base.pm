@@ -119,7 +119,7 @@
         my @query = split(' ',$message);
 
         ### If the first query array item matches your prefix in your config, start looking for replies.
-        if ($settings->{'prefix'} && $query[0] eq $settings->{'prefix'}) {
+        if ($settings->{'prefix'} && $query[0] =~ m/$config->{'settings'}->{'prefix'}/gi) {
             @query = @query[1 .. $#_];
 
             ### Rehash command
