@@ -1,0 +1,5 @@
+<opt>
+  <!-- Below is an example user. When you boot up the bot and you invoke the 'register' command you will be added here. -->
+  <!-- Don't forget to rename this file to users.xml -->
+  <JohnDoe hostname=":JohnDoe!John@Doe.org" rights="default rehash" />
+</opt>

@@ -113,6 +113,7 @@ sub createSocket {
             if ($status eq "initialized") {
                 ### Start of extracting data that we need later on
                 my @data = split(' ',$input);
+                my $hostname = $data[0];
                 ($data[0]) = ($data[0] =~ m/(?<=:)(.*?)(?=!)/gi);
 
                 ### Everything after 3 is the ´query´ of the user. Put that in a scalar
@@ -123,7 +124,7 @@ sub createSocket {
                     $query = substr $query, 1; # strip first char (:).
 
                     ### Parse our earlier collected data to our main messageReceived function
-                    $bot->messageReceived($input, $data[0], $query, $data[2], $data[1]);
+                    $bot->messageReceived($input, $data[0], $query, $data[2], $data[1], $hostname);
                   }
             }
 

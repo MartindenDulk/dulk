@@ -26,6 +26,7 @@
 #########################################################
 
   my $bot = new dulk::Base;
+  my $config = $bot->config();
 
 #########################################################
 ### SUBROUTINES
@@ -46,13 +47,30 @@
       ### @query now holds your message splitted. You can check for input by checking the values of $query[x]
       my @query = split(' ',$message);
 
+      ### If the first query array item matches your prefix in your config, start looking for replies.
+      if ($config->{'settings'}->{'prefix'} && $query[0] eq $config->{'settings'}->{'prefix'}) {
+        @query = @query[1 .. $#_];
 
-      ### Dummy command. Boot the bot and say 'foo' in the channel he's on. It will show the response stated below.
-      if ($query[0] eq 'foo') {
+        ### Dummy command. Boot the bot and say 'foo' in the channel he's on. It will show the response stated below.
+        if ($query[0] eq 'foo') {
 
-        ### Yep, 'foo' was said. Let's talk back!
-        $bot->relayMessage("Hey! I just received $query[0] from $nickname on $destination. The full command was $message",$destination);
+          ### Yep, 'foo' was said. Let's talk back!
+          $bot->relayMessage("Hey! I just received $query[0] from $nickname on $destination. The full command was $message",$destination);
+        }
+
+
       }
   }
 
+
+#########################################################
+### COMMAND REGISTRATION
+#########################################################
+
+  ### If you want your command to show up when you PM the bot with 'commands'. You need to register your command.
+  ### The 'registerCommand' subroutine accepts two parameters: 'command' & 'help text'.
+  ### If you rehash the bot, it will re-register these texts too and re-write the commands.xml
+
+  $bot->registerCommand("foo","When a user says 'foo' on a channel. It will reply with some text");
+  
 1;
