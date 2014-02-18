@@ -67,7 +67,7 @@
 ### COMMAND REGISTRATION
 #########################################################
 
-  ### If you want your command to show up when you PM the bot with 'help'. You need to register your command.
+  ### If you want your command to show up when you PM the bot with 'commands'. You need to register your command.
   ### The 'registerCommand' subroutine accepts two parameters: 'command' & 'help text'.
   ### If you rehash the bot, it will re-register these texts too and re-write the commands.xml
 
