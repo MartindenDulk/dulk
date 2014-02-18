@@ -123,14 +123,14 @@
             @query = @query[1 .. $#query];
 
             ### Rehash command
-            ### - The user that invokes this command needs to have the 'rehash' or the 'global-admin' right added in the users.xml. See the README for more information.
+            ### - The user that invokes this command needs to have the 'rehash' or the 'admin-users' right added in the users.xml. See the README for more information.
             if ($query[0] eq 'rehash' && $user->userCan("rehash",@input)) {
                 throwError("INFO","Rehash was invoked. Starting now..",__PACKAGE__);
                 reloadPlugins();
                 throwError("INFO","Rehash has completed.",__PACKAGE__);
             }
 
-            ### - The user that invokes these two commands needs to have the 'admin-users' or the 'global-admin' right added in the users.xml. See the README for more information.
+            ### - The user that invokes these two commands needs to have the 'admin-users' or the 'admin-users' right added in the users.xml. See the README for more information.
             if ($query[0] eq 'grant' && $user->userCan("admin-users",@input)) {
                 my $grantMessage = $user->grantUser($query[1], $query[2], $destination);
                 relayMessage($grantMessage,$destination);
