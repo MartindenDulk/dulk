@@ -130,6 +130,17 @@
                 throwError("INFO","Rehash has completed.",__PACKAGE__);
             }
 
+            ### - The user that invokes these two commands needs to have the 'admin-users' right added in the users.xml. See the README for more information.
+            if ($query[0] eq 'grant' && $user->userCan("admin-users",@input)) {
+                my $grantMessage = $user->grantUser($query[1], $query[2], $destination);
+                relayMessage($grantMessage,$destination);
+            }
+
+            if ($query[0] eq 'revoke' && $user->userCan("admin-users",@input)) {
+                my $revokeMessage = $user->revokeUser($query[1], $query[2], $destination);
+                relayMessage($revokeMessage,$destination);
+            }
+
             ### Help command
             if ($query[0] eq 'help') {
                 relayMessage("Curious on what I can do? Try PMing me with 'commands'.",$destination);
