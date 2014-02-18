@@ -50,8 +50,8 @@
       my @query = split(' ',$message);
 
       ### If the first query array item matches your prefix in your config, start looking for replies.
-      if ($config->{'settings'}->{'prefix'} && $query[0] eq $config->{'settings'}->{'prefix'}) {
-        @query = @query[1 .. $#_];
+      if ($config->{'settings'}->{'prefix'} && $query[0] =~ m/$config->{'settings'}->{'prefix'}/gi) {
+        @query = @query[1 .. $#query];
 
         ### Dummy command. Boot the bot and say 'foo' in the channel he's on. It will show the response stated below.
         if ($query[0] eq 'foo') {

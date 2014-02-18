@@ -119,8 +119,8 @@
         my @query = split(' ',$message);
 
         ### If the first query array item matches your prefix in your config, start looking for replies.
-        if ($settings->{'prefix'} && $query[0] eq $settings->{'prefix'}) {
-            @query = @query[1 .. $#_];
+        if ($settings->{'prefix'} && $query[0] =~ m/$config->{'settings'}->{'prefix'}/gi) {
+            @query = @query[1 .. $#query];
 
             ### Rehash command
             ### - The user that invokes this command needs to have the 'rehash' or the 'global-admin' right added in the users.xml. See the README for more information.
