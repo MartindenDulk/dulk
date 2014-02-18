@@ -52,7 +52,7 @@
 
             saveUsers();
 
-            $bot->relayMessage("You've been added with the default priviledges. Welcome!", $destination);
+            $bot->relayMessage("You've been added with the default privileges. Welcome!", $destination);
         }
     }
 
@@ -90,7 +90,7 @@
 
             saveUsers();
 
-            return "[INFO] $nickname has been granted '$command' priviledges";
+            return "[INFO] $nickname has been granted '$command' privileges";
         } else {
             ### User is unknown
             return "[ERROR] $nickname has not registered with me. Use '$settings->{'prefix'} register' to register.";
@@ -108,7 +108,7 @@
 
             saveUsers();
 
-            return "[INFO] $command priviledge has been revoked from $nickname";
+            return "[INFO] $command privilege has been revoked from $nickname";
         } else {
             ### User is unknown
             return "[ERROR] $nickname has not registered with me. Nothing was revoked.";
